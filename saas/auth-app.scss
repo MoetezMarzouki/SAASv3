@@ -1,0 +1,396 @@
+// auth-app.scss
+
+// Variables
+$primary: #4f46e5;
+$primary-dark: #4338ca;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+$red-100: #fee2e2;
+$red-600: #ef4444;
+$red-700: #b91c1c;
+$green-100: #d1fae5;
+$green-700: #047857;
+$yellow-100: #fef3c7;
+$yellow-700: #92400e;
+
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+// Mixins
+@mixin transition($properties...) {
+  transition-property: $properties;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba($primary, 0.2);
+}
+
+// Base Styles
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  color: $gray-700;
+  background-color: $gray-100;
+}
+
+// Layout
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+// Header
+.app-header {
+  background-color: white;
+  border-bottom: 1px solid $gray-200;
+  box-shadow: $shadow-sm;
+
+  .nav-link {
+    position: relative;
+    @include transition(color);
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: $primary;
+      @include transition(width);
+    }
+
+    &:hover:after,
+    &.active:after {
+      width: 100%;
+    }
+  }
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  @include transition(background-color, border-color, color, box-shadow);
+  position: relative;
+  overflow: hidden;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+  }
+
+  &:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 0.5;
+    }
+    20% {
+      transform: scale(25, 25);
+      opacity: 0.3;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(40, 40);
+    }
+  }
+
+  &-primary {
+    background-color: $primary;
+    color: white;
+    
+    &:hover {
+      background-color: $primary-dark;
+    }
+    
+    &:focus {
+      @include focus-ring;
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Cards
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: $shadow;
+  overflow: hidden;
+  @include transition(box-shadow, transform);
+  
+  &:hover {
+    box-shadow: $shadow-lg;
+  }
+  
+  &-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid $gray-200;
+    
+    h2, h3 {
+      font-weight: 600;
+      color: $gray-900;
+    }
+  }
+  
+  &-body {
+    padding: 1.5rem;
+  }
+}
+
+// Forms
+.form {
+  &-group {
+    margin-bottom: 1rem;
+  }
+  
+  &-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: $gray-700;
+  }
+  
+  &-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: $gray-700;
+    background-color: white;
+    background-clip: padding-box;
+    border: 1px solid $gray-300;
+    border-radius: 0.375rem;
+    @include transition(border-color, box-shadow);
+    
+    &:focus {
+      border-color: $primary;
+      @include focus-ring;
+    }
+    
+    &::placeholder {
+      color: $gray-400;
+    }
+  }
+}
+
+// Auth Forms
+.auth {
+  &-form-container {
+    max-width: 32rem;
+    margin: 2rem auto;
+  }
+  
+  &-form {
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: $shadow-md;
+  }
+  
+  &-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: $gray-900;
+  }
+  
+  &-error {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background-color: $red-100;
+    border-left: 4px solid $red-600;
+    color: $red-700;
+    border-radius: 0.25rem;
+  }
+  
+  &-submit {
+    width: 100%;
+    padding: 0.625rem 1.25rem;
+    margin-top: 1.5rem;
+    background-color: $primary;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    @include transition(background-color);
+    
+    &:hover {
+      background-color: $primary-dark;
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+  
+  &-link {
+    color: $primary;
+    font-weight: 500;
+    @include transition(color);
+    
+    &:hover {
+      color: $primary-dark;
+      text-decoration: underline;
+    }
+  }
+}
+
+// Dashboard
+.dashboard {
+  &-container {
+    margin-top: 2rem;
+  }
+  
+  &-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: $gray-900;
+  }
+  
+  &-card {
+    @extend .card;
+    margin-bottom: 1.5rem;
+    
+    &-header {
+      @extend .card-header;
+    }
+    
+    &-body {
+      @extend .card-body;
+    }
+  }
+  
+  &-table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background-color: $gray-50;
+      font-weight: 500;
+      color: $gray-500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+    }
+    
+    td {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid $gray-200;
+      font-size: 0.875rem;
+    }
+    
+    tr:hover {
+      background-color: $gray-50;
+    }
+  }
+}
+
+// Status Badge
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  
+  &-success {
+    background-color: $green-100;
+    color: $green-700;
+  }
+  
+  &-warning {
+    background-color: $yellow-100;
+    color: $yellow-700;
+  }
+}
+
+// Namespace Grid
+.namespace {
+  &-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  &-item {
+    padding: 0.625rem;
+    background-color: $gray-50;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: $gray-600;
+    border: 1px solid $gray-200;
+    text-align: center;
+    @include transition(background-color, border-color, box-shadow);
+    
+    &:hover {
+      background-color: $gray-100;
+      border-color: $gray-300;
+      box-shadow: $shadow-sm;
+    }
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 768px) {
+  .dashboard-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .namespace-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-form-container {
+    margin: 1rem;
+  }
+  
+  .auth-form {
+    padding: 1.5rem;
+  }
+}

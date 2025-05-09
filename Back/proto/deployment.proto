@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package k3s;
+option go_package = "github.com/yourusername/k3s";
+
+// DeploymentService defines the gRPC service for managing K3s deployments
+service DeploymentService {
+  // ListDeployments returns all deployments in a namespace
+  rpc ListDeployments(ListRequest) returns (ListResponse) {}
+  
+  // CreateDeployment creates a new deployment
+  rpc CreateDeployment(CreateRequest) returns (StatusResponse) {}
+  
+  // DeleteDeployment deletes an existing deployment
+  rpc DeleteDeployment(DeleteRequest) returns (StatusResponse) {}
+  
+  // ListNamespaces returns all available namespaces
+  rpc ListNamespaces(Empty) returns (NamespacesResponse) {}
+}
+
+// Empty message for requests with no parameters
+message Empty {}
+
+// ListRequest specifies the namespace to list deployments from
+message ListRequest {
+  string namespace = 1;
+}
+
+// Deployment represents a Kubernetes deployment
+message Deployment {
+  string name = 1;
+  string namespace = 2;
+  string image = 3;
+  int32 replicas = 4;
+  string status = 5;
+  string age = 6;
+}
+
+// ListResponse contains the list of deployments
+message ListResponse {
+  repeated Deployment deployments = 1;
+}
+
+// CreateRequest contains the information needed to create a deployment
+message CreateRequest {
+  string name = 1;
+  string namespace = 2;
+  string image = 3;
+  int32 replicas = 4;
+  int32 port = 5;
+}
+
+// DeleteRequest specifies the deployment to delete
+message DeleteRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
+// StatusResponse provides feedback about the success of an operation
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// NamespacesResponse contains the list of available namespaces
+message NamespacesResponse {
+  repeated string namespaces = 1;
+}

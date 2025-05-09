@@ -1,0 +1,166 @@
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, Check, Server, Trash2, RefreshCw, Plus, X } from 'lucide-react';
+import { DeploymentServiceClient } from './deployment_grpc_web_pb';
+import { 
+  ListRequest, 
+  Empty, 
+  CreateRequest, 
+  DeleteRequest 
+} from './deployment_pb';
+
+// Create a client (make sure the URL matches your Envoy proxy)
+const client = new DeploymentServiceClient('http://localhost:8080');
+
+const K3sDeploymentDashboard = () => {
+  // State management (keep your existing state)
+  const [deployments, setDeployments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [namespaces, setNamespaces] = useState(['default']);
+  const [selectedNamespace, setSelectedNamespace] = useState('default');
+  
+  // Form state (keep your existing form state)
+  const [formData, setFormData] = useState({
+    name: '',
+    namespace: 'default',
+    image: '',
+    replicas: 1,
+    port: 80
+  });
+
+  // Updated API functions using gRPC-Web
+  const fetchNamespaces = async () => {
+    try {
+      const request = new Empty();
+      
+      client.listNamespaces(request, {}, (err, response) => {
+        if (err) {
+          console.error("Failed to fetch namespaces:", err);
+          showNotification('error', 'Failed to load namespaces');
+          return;
+        }
+        
+        const namespacesList = response.getNamespacesList();
+        setNamespaces(namespacesList);
+      });
+    } catch (err) {
+      console.error("Failed to fetch namespaces:", err);
+      showNotification('error', 'Failed to load namespaces');
+    }
+  };
+
+  const fetchDeployments = async () => {
+    try {
+      setLoading(true);
+      
+      const request = new ListRequest();
+      request.setNamespace(selectedNamespace);
+      
+      client.listDeployments(request, {}, (err, response) => {
+        if (err) {
+          console.error("Failed to fetch deployments:", err);
+          setError('Failed to fetch deployments. Please check your connection to the backend.');
+          setLoading(false);
+          return;
+        }
+        
+        // Convert from protobuf objects to plain JS objects
+        const deploymentsList = response.getDeploymentsList().map(dep => ({
+          name: dep.getName(),
+          namespace: dep.getNamespace(),
+          image: dep.getImage(),
+          replicas: dep.getReplicas(),
+          status: dep.getStatus(),
+          age: dep.getAge()
+        }));
+        
+        setDeployments(deploymentsList);
+        setError(null);
+        setLoading(false);
+      });
+    } catch (err) {
+      console.error("Failed to fetch deployments:", err);
+      setError('Failed to fetch deployments. Please check your connection to the backend.');
+      setLoading(false);
+    }
+  };
+
+  const createDeployment = async () => {
+    try {
+      setLoading(true);
+      
+      const request = new CreateRequest();
+      request.setName(formData.name);
+      request.setNamespace(formData.namespace);
+      request.setImage(formData.image);
+      request.setReplicas(formData.replicas);
+      request.setPort(formData.port);
+      
+      client.createDeployment(request, {}, (err, response) => {
+        if (err) {
+          console.error("Failed to create deployment:", err);
+          showNotification('error', `Failed to create deployment: ${err.message}`);
+          setLoading(false);
+          return;
+        }
+        
+        showNotification('success', response.getMessage() || `Deployment ${formData.name} created successfully`);
+        
+        // Reset form
+        setFormData({
+          name: '',
+          namespace: 'default',
+          image: '',
+          replicas: 1,
+          port: 80
+        });
+        
+        // Close modal and refresh deployments
+        setShowModal(false);
+        fetchDeployments();
+        setLoading(false);
+      });
+    } catch (err) {
+      console.error("Failed to create deployment:", err);
+      showNotification('error', `Failed to create deployment: ${err.message}`);
+      setLoading(false);
+    }
+  };
+
+  const deleteDeployment = async (name, namespace) => {
+    try {
+      setLoading(true);
+      
+      const request = new DeleteRequest();
+      request.setName(name);
+      request.setNamespace(namespace);
+      
+      client.deleteDeployment(request, {}, (err, response) => {
+        if (err) {
+          console.error("Failed to delete deployment:", err);
+          showNotification('error', `Failed to delete deployment ${name}: ${err.message}`);
+          setLoading(false);
+          return;
+        }
+        
+        showNotification('success', response.getMessage() || `Deployment ${name} deleted successfully`);
+        
+        // Refresh deployments
+        fetchDeployments();
+      });
+    } catch (err) {
+      console.error("Failed to delete deployment:", err);
+      showNotification('error', `Failed to delete deployment ${name}: ${err.message}`);
+      setLoading(false);
+    }
+  };
+
+  // Keep the rest of your component the same (notification helper, form handlers, useEffect, JSX)
+  // ...
+
+  // (Keep your existing notification, form handlers, and UI code unchanged)
+};
+
+export default K3sDeploymentDashboard;
